@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+.vscode/
+data/
+!data/.gitkeep
+.coverage
+htmlcov/
+CLAUDE.md
