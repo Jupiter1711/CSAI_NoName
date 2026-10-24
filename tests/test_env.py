@@ -4,7 +4,7 @@ import sys
 import pytest
 
 
-@pytest.mark.parametrize("name", ["black", "flake8", "pytest_cov", "src"])
+@pytest.mark.parametrize("name", ["black", "flake8", "pytest_cov", "bloxorz"])
 def test_module_importable(name):
     assert importlib.import_module(name) is not None
 
