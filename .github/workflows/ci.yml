@@ -15,4 +15,4 @@ jobs:
                 cache-dependency-path: requirements-dev.txt
             - run: pip install -r requirements-dev.txt
             - run: pre-commit run --all-files --show-diff-on-failure
-            - run: pytest --cov=src --cov-report=term-missing
+            - run: pytest --cov=bloxorz --cov-report=term-missing
