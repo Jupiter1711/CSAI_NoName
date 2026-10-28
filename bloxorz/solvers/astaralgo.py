@@ -84,6 +84,8 @@ def _manhattan(goal: tuple[int, int], r: int, c: int) -> int:
 
 
 def heuristic(problem: BloxorzProblem, state: State) -> float:
+    #If Block is spliting, h(n) = maxDist of minDist + cost to merge 2 blocks
+    #Else, h(n) is cal through BFS
     goal = problem.level.goal
     if state.kind == SPLIT:
         d1 = _manhattan(goal, state.r1, state.c1)
