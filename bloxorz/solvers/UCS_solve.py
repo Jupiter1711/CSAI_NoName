@@ -36,6 +36,7 @@ def cal_initial_cost(level: Level, cell: Cell, kind: str) -> int:
 
     return cost
 
+
 class UCSstate:
     def __init__(
         self,
@@ -137,9 +138,9 @@ def solve(problem: BloxorzProblem) -> SearchResult:
 
             if exist_node_cost is not None and exist_node_cost <= new_cost:
                 continue
-            
+
             labels[next_state] = new_cost
-            
+
             heapq.heappush(
                 mincost_heap,
                 (new_cost, next(counter), next_node),
