@@ -2,6 +2,7 @@ import heapq
 import itertools
 
 from bloxorz.core.level import FRAGILE, HEAVY, SOFT, SPLITTER, Level
+from bloxorz.core.problem import BloxorzProblem
 from bloxorz.core.rules import (
     DIRECTIONS,
     TRANSITIONS,
@@ -54,7 +55,8 @@ class UCSstate:
         self.total_cost = total_cost
 
 
-def game_solveUCS(level: Level) -> SearchResult:
+def solve(problem: BloxorzProblem) -> SearchResult:
+    level = problem.level
     start_node = UCSstate(
         state=initial_state(level),
         visits={},
