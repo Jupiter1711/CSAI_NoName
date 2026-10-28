@@ -36,21 +36,14 @@ def cal_initial_cost(level: Level, cell: Cell, kind: str) -> int:
 
     return cost
 
-
-def visits_compare(a: dict[Cell, int], b: dict[Cell, int]) -> bool:
-    return all(count_a <= b.get(cell, 0) for cell, count_a in a.items())
-
-
 class UCSstate:
     def __init__(
         self,
         state: State,
-        visits: dict[Cell, int],
         path: list[str],
         total_cost: int,
     ) -> None:
         self.state = state
-        self.visits = visits
         self.path = path
         self.total_cost = total_cost
 
@@ -59,12 +52,11 @@ def solve(problem: BloxorzProblem) -> SearchResult:
     level = problem.level
     start_node = UCSstate(
         state=initial_state(level),
-        visits={},
         path=[],
         total_cost=0,
     )
 
-    labels = {start_node.state: [(start_node.total_cost, start_node.visits)]}
+    labels = {start_node.state: start_node.total_cost}
 
     expanded = 0
     mincost_heap = []
@@ -74,10 +66,7 @@ def solve(problem: BloxorzProblem) -> SearchResult:
     while mincost_heap:
         curcost, _, curnode = heapq.heappop(mincost_heap)
 
-        if not any(
-            cost == curcost and visits == curnode.visits
-            for cost, visits in labels.get(curnode.state, [])
-        ):
+        if labels.get(curnode.state) != curcost:
             continue
 
         if is_goal(level, curnode.state):
@@ -94,7 +83,6 @@ def solve(problem: BloxorzProblem) -> SearchResult:
             if next_state is None:
                 continue
 
-            new_visits = curnode.visits.copy()
             new_cost = curcost
 
             moved_cell = None
@@ -117,7 +105,6 @@ def solve(problem: BloxorzProblem) -> SearchResult:
                     split_switch_cell = destination
 
             for cell in next_state.cells:
-                previous_visits = new_visits.get(cell, 0)
                 cell_cost = cal_initial_cost(
                     level,
                     cell,
@@ -131,63 +118,30 @@ def solve(problem: BloxorzProblem) -> SearchResult:
                     if switch is not None:
                         cell_cost -= switch.mask.bit_count()
 
-                new_cost += cell_cost + previous_visits
-                if curnode.state.kind != SPLIT or (
-                    curnode.state.kind == SPLIT and cell == moved_cell
-                ):
-                    new_visits[cell] = previous_visits + 1
+                new_cost += cell_cost
 
             if split_switch_cell is not None:
                 switch = level.switches[split_switch_cell]
 
                 new_cost += 1 + len(switch.targets)
 
-                if split_switch_cell not in next_state.cells:
-                    previous_visits = new_visits.get(split_switch_cell, 0)
-                    new_cost += previous_visits
-                    new_visits[split_switch_cell] = previous_visits + 1
-
             new_path = curnode.path + [action]
 
             next_node = UCSstate(
                 state=next_state,
-                visits=new_visits,
                 path=new_path,
                 total_cost=new_cost,
             )
 
-            next_node_label = (
-                next_node.total_cost,
-                next_node.visits,
-            )
-            exist_node_labels = labels.get(next_node.state, [])
+            exist_node_cost = labels.get(next_state)
 
-            dominated = False
-            for old_cost, old_visits in exist_node_labels:
-                if old_cost <= next_node_label[0] and visits_compare(
-                    old_visits, next_node_label[1]
-                ):
-                    dominated = True
-                    break
-
-            if dominated:
+            if exist_node_cost is not None and exist_node_cost <= new_cost:
                 continue
-
-            exist_node_labels = [
-                (old_cost, old_visits)
-                for old_cost, old_visits in exist_node_labels
-                if not (
-                    next_node_label[0] <= old_cost
-                    and visits_compare(next_node_label[1], old_visits)
-                )
-            ]
-
-            exist_node_labels.append(next_node_label)
-            labels[next_node.state] = exist_node_labels
-
+            
+            labels[next_state] = new_cost
+            
             heapq.heappush(
                 mincost_heap,
                 (new_cost, next(counter), next_node),
             )
-
     return SearchResult(path=None, expanded=expanded, cost=0.0)
