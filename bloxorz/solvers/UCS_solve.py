@@ -84,7 +84,7 @@ def solve(problem: BloxorzProblem) -> SearchResult:
             return SearchResult(
                 path=curnode.path,
                 expanded=expanded,
-                cost=curcost,
+                cost=float(curcost),
             )
 
         expanded += 1
@@ -190,4 +190,4 @@ def solve(problem: BloxorzProblem) -> SearchResult:
                 (new_cost, next(counter), next_node),
             )
 
-    return SearchResult(path=None, expanded=expanded, cost=0)
+    return SearchResult(path=None, expanded=expanded, cost=0.0)
