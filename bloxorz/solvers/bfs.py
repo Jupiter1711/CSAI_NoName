@@ -1,6 +1,7 @@
 from collections import deque
 
 from bloxorz.core.problem import BloxorzProblem
+
 from .base import SearchResult
 
 
