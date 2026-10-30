@@ -148,10 +148,84 @@ Mô tả thiết kế giao diện trực quan của chương trình, cách hiể
 \end{itemize}
 
 \subsection{Thuật toán Breadth-First Search (BFS)}
-Trình bày nguyên lý duyệt theo chiều rộng sử dụng hàng đợi FIFO, cách truy vết đường đi và phân tích tính đầy đủ, tính tối ưu theo số bước di chuyển.
+
+
+
+\textbf{ 1. Cơ chế Kiểm soát trạng thái}
+
+
+Thuật toán Breadth-First Search (BFS) giải quyết bài toán Bloxorz bằng cách khám phá không gian trạng thái theo từng lớp độ sâu tăng dần ($d = 0, 1, 2, \dots$). Nguyên lý vận hành dựa trên cấu trúc dữ liệu hàng đợi FIFO (\textit{First-In, First-Out}) từ thư viện \texttt{collections.deque}:
+
+\begin{itemize}
+    \item \textbf{Khởi tạo:} Trạng thái ban đầu \texttt{start\_state} được đưa vào \texttt{queue}. Tập \texttt{came\_from} đóng vai trò vừa lưu vết vừa đánh dấu trạng thái đã thăm.
+    \item \textbf{Vòng lặp duyệt:} Tại mỗi bước, thuật toán lấy trạng thái ở đầu hàng đợi ra xử lý thông qua thao tác \texttt{queue.popleft()}.
+    \item \textbf{Mở rộng trạng thái:} Hàm \texttt{problem.successors(state)} sinh ra các trạng thái kế tiếp hợp lệ. Nếu trạng thái tiếp theo chưa từng xuất hiện trong bảng băm, nó sẽ được ghi nhận và chèn vào cuối hàng đợi.
+\end{itemize}
+
+Cơ chế FIFO đảm bảo rằng tất cả các trạng thái ở độ sâu $k$ đều được lấy ra kiểm tra trước khi bất kỳ trạng thái nào ở độ sâu $k+1$ được xử lý.
+
+\textbf{2. Cơ chế Truy vết Đường đi}
+
+Mã nguồn thực hiện truy vết đường đi thông qua bảng băm \texttt{came\_from} lưu cấu trúc \texttt{\{next\_state: (parent\_state, action)\}}:
+
+\begin{itemize}
+    \item \textbf{Ghi nhận vết:} Ngay khi một trạng thái mới \texttt{next\_state} được phát hiện, mối quan hệ giữa nó với trạng thái cha \texttt{state} và hành động tương ứng \texttt{action} được lưu lại. Trạng thái xuất phát có giá trị vết là \texttt{None}.
+    \item \textbf{Hàm \texttt{reconstruct\_path}:} Khi tìm thấy mục tiêu (\texttt{is\_goal(state) == True}), hàm tiến hành đi ngược từ \texttt{goal\_state} về \texttt{start\_state} bằng cách liên tục truy vấn cha của trạng thái hiện tại.
+    \item \textbf{Đảo ngược chuỗi:} Mảng kết quả sau khi đi ngược được đảo lại bằng \texttt{path.reverse()} để thu được chuỗi các hành động theo đúng thứ tự thời gian từ đầu đến cuối.
+\end{itemize}
+
+\textbf{3. Phân tích Tính Đầy đủ và Tính Tối ưu}
+
+\textbf{a. Tính đầy đủ}
+Thuật toán BFS đảm bảo \texttt{tính đầy đủ}: Nếu bài toán tồn tại lời giải, BFS chắc chắn sẽ tìm ra. 
+\begin{itemize}
+    \item Bài toán Bloxorz có không gian trạng thái hữu hạn (các ô bàn chơi, các tư thế khối gạch và tập hợp trạng thái cầu/công tắc).
+    \item Việc kiểm tra \texttt{next\_state not in came\_from} trước khi đưa vào hàng đợi giúp ngăn chặn việc duyệt lặp lại các chu trình (cycles), tránh vòng lặp vô tận.
+\end{itemize}
+
+\textbf{b. Tính tối ưu theo số bước di chuyển}
+Thuật toán BFS đạt **tính tối ưu tuyệt đối về số bước di chuyển** (chi phí mỗi nước đi $c = 1$):
+\begin{itemize}
+    \item Nhờ cơ chế duyệt theo từng lớp độ sâu tăng dần $0, 1, 2, \dots, d$, trạng thái đích $G$ khi lần đầu tiên xuất hiện ở đầu hàng đợi \texttt{queue} chắc chắn nằm ở độ sâu nhỏ nhất $d^*$.
+    \item Do đó, đường đi tìm được qua hàm truy ngược luôn là đường đi có số bước lăn khối ít nhất.
+\end{itemize}
 
 \subsection{Thuật toán Depth-First Search (DFS)}
-Trình bày nguyên lý duyệt theo chiều sâu sử dụng ngăn xếp LIFO (hoặc Iterative Deepening Search), cơ chế kiểm soát trạng thái đã thăm để tránh lặp vô hạn và đặc điểm của lời giải thu được.
+\textbf{1. Nguyên lý duyệt theo chiều sâu với Ngăn xếp LIFO}
+
+Thuật toán Depth-First Search (DFS) giải quyết bài toán Bloxorz bằng cách khám phá không gian trạng thái theo tư tưởng "đi sâu nhất có thể trước khi quay lui". Nguyên lý này được hiện thực hóa thông qua cấu trúc dữ liệu Ngăn xếp LIFO:
+
+\begin{itemize}
+    \item \textbf{Cấu trúc lưu trữ:} Thuật toán sử dụng một danh sách (list) chuẩn của Python làm \texttt{stack}.
+    \item \textbf{Thao tác cốt lõi:} Khi các trạng thái con (\texttt{next\_state}) được sinh ra, chúng được đẩy vào cuối ngăn xếp. Ngay ở vòng lặp tiếp theo, trạng thái vừa được đưa vào sẽ bị lấy ra xử lý.
+    \item \textbf{Đặc tính duyệt:} Sự kết hợp của \texttt{append} và \texttt{pop} khiến thuật toán liên tục đi xuống các nhánh sâu hơn của cây tìm kiếm thay vì mở rộng dàn trải, chỉ thực hiện quay lui (backtrack) khi gặp ngõ cụt (trạng thái không sinh thêm được nhánh con hợp lệ nào mới).
+\end{itemize}
+
+\textbf{2. Cơ chế kiểm soát trạng thái đã thăm}
+
+Bài toán Bloxorz có tính chất đồ thị vô hướng cục bộ (khối gạch lăn đi rồi có thể lăn ngược lại vị trí cũ), dẫn đến nguy cơ sinh ra chu trình (cycles). Để ngăn DFS rơi vào vòng lặp vô tận, cơ chế kiểm soát trạng thái được thiết lập:
+
+\begin{itemize}
+    \item \textbf{Sử dụng bảng băm làm tập \texttt{visited}:}  không chỉ dùng để truy vết đường đi mà còn kiêm luôn vai trò của tập hợp các đỉnh đã thăm.
+    \item \textbf{Kiểm tra trước khi mở rộng:} Điều kiện \texttt{if next\_state not in came\_from:} đóng vai trò như một màng lọc. Một trạng thái mới sinh ra chỉ được đẩy vào \texttt{stack} nếu nó chưa từng xuất hiện trong quá trình duyệt trước đó.
+    \item \textbf{Hiệu quả:} Cơ chế này chặt đứt mọi chu trình, ép đồ thị trạng thái trở thành một cây tìm kiếm hữu hạn, đảm bảo thuật toán luôn kết thúc.
+\end{itemize}
+
+\textbf{3. Đặc điểm của Lời giải thu được}
+
+Khác với BFS, lời giải được sinh ra bởi thuật toán DFS (bản đồ thị) mang hai đặc điểm hệ trọng:
+
+\textbf{a. Tính đầy đủ}
+
+Trên một không gian trạng thái hữu hạn (như bàn cờ Bloxorz) và có cơ chế kiểm soát trạng thái đã thăm, thuật toán DFS \textbf{đảm bảo tính đầy đủ}. Nếu tồn tại một đường đi đến đích, DFS chắc chắn sẽ tìm thấy (vì nó sẽ vét cạn mọi nhánh nếu cần thiết).
+
+\textbf{b. Tính không tối ưu }
+
+Thuật toán DFS \textbf{không đảm bảo tính tối ưu} về số bước di chuyển:
+\begin{itemize}
+    \item Do đặc thù đâm sâu, thuật toán sẽ trả về chuỗi hành động \textit{đầu tiên} chạm đến trạng thái đích (\texttt{is\_goal(state) == True}).
+    \item Lời giải này thường là một đường đi rất dài, đi đường vòng hoặc chứa nhiều thao tác dư thừa (vd: lăn qua lăn lại ở một khu vực trước khi vô tình rẽ vào hố đích), chi phí cao hơn rất nhiều so với các lời giải khác trong báo cáo.
+\end{itemize}
 
 \subsection{Thuật toán Uniform-Cost Search (UCS)}
 \begin{itemize}
@@ -160,10 +234,79 @@ Trình bày nguyên lý duyệt theo chiều sâu sử dụng ngăn xếp LIFO (
 \end{itemize}
 
 \subsection{Thuật toán A* Search}
+Hàm heuristic $h(n)$ đóng vai trò ước lượng chi phí (số bước di chuyển tối thiểu) từ trạng thái hiện tại $n$ đến trạng thái đích. Bài toán Bloxorz có đặc thù về hình học 3D (tư thế khối gạch) và cơ chế tách khối, do đó hàm $h(n)$ được thiết kế chia làm hai trường hợp riêng biệt nhằm tối ưu hóa khả năng định hướng.
+
+\textbf{1. Trường hợp khối liền (Tư thế S, H, V)}
+
+Đối với các trạng thái khối nguyên vẹn (Đứng - S, Nằm ngang - H, Nằm dọc - V), việc sử dụng khoảng cách Manhattan thông thường sẽ không phản ánh đúng chi phí do bỏ qua yếu tố tư thế. Do đó, phương pháp \textbf{BFS ngược} được đề xuất. Trong đó thay vì tính toán chi phí bằng hàm khoảng cách Mahattan, thuật toán BFS giản lược được chạy ngược từ điểm đích.
+
+Trước khi A* thực thi, ta xây dựng một không gian trạng thái nới lỏng $\mathcal{G}_{relax} = (V, E)$, trong đó:
 \begin{itemize}
-    \item \textbf{Thiết kế hàm Heuristic $h(n)$:} Trình bày phương pháp xây dựng hàm ước lượng chi phí từ trạng thái hiện tại đến trạng thái đích (xét cả tư thế khối và trạng thái tách đôi).
-    \item \textbf{Tính chấp nhận được (Admissibility) và Tính nhất quán (Consistency):} Chứng minh và lập luận vì sao hàm heuristic $h(n)$ không bao giờ đánh giá vượt quá chi phí thực tế nhỏ nhất tương ứng với hàm chi phí đã chọn.
+    \item Tạm thời bỏ qua trạng thái đóng/mở của các ô cầu và công tắc (giả định mọi ô cầu đều là gạch bình thường và luôn mở).
+    \item Tôn trọng tuyệt đối địa hình cứng: Không cho phép lăn ra ngoài vực (\texttt{VOID}) và cấm tư thế đứng thẳng (\texttt{S}) trên ô gạch giòn (\texttt{FRAGILE}).
 \end{itemize}
+
+Từ trạng thái đích $G = (r_G, c_G, \text{S})$, thuật toán BFS chạy ngược để tính khoảng cách ngắn nhất đến mọi tọa độ và tư thế hợp lệ trên bản đồ. Kết quả được lưu vào bảng băm $D$. 
+
+Hàm heuristic cho trạng thái khối liền $n = (r, c, k)$ được định nghĩa là:
+\begin{equation}
+    h(n) = 
+    \begin{cases} 
+    D[r, c, k] & \text{nếu } (r, c, k) \in D \\
+    \frac{|r - r_G| + |c - c_G|}{2} & \text{trong trường hợp ngoại lệ (dự phòng)}
+    \end{cases}
+\end{equation}
+Nhờ việc tính toán trước (pre-compute), $h(n)$ có độ phức tạp tra cứu là $O(1)$.
+
+\textbf{2. Trường hợp khối tách đôi}
+
+Khi đi qua công tắc Split, khối gạch tách thành hai khối lập phương nhỏ $C_1 = (r_1, c_1)$ và $C_2 = (r_2, c_2)$. Để chiến thắng, hai khối này phải hợp lại thành một khối liền kề và di chuyển đến đích. 
+
+Gọi $d_M(A, B)$ là khoảng cách Manhattan phẳng giữa hai điểm $A$ và $B$. Ta định nghĩa:
+\begin{itemize}
+    \item $d_1 = d_M(C_1, G)$ và $d_2 = d_M(C_2, G)$ là khoảng cách từ mỗi khối nhỏ đến đích.
+    \item $d_{cubes} = d_M(C_1, C_2)$ là khoảng cách giữa hai khối nhỏ.
+\end{itemize}
+
+Mỗi nước lăn của khối chữ nhật thay đổi tọa độ Manhattan tối đa 2 đơn vị. Tuy khối vuông nhỏ mỗi bước đi 1 ô (tốn chi phí 1), nhưng chi phí đó chia đều cho 2 khối sẽ hội tụ về chung hệ số. Ta thiết lập hàm $h(n)$ cho trạng thái Split dựa trên hai chặn dưới:
+\begin{equation}
+    h_{split}(n) = \max \left( \frac{\max(d_1, d_2)}{2}, \frac{d_{cubes} - 1}{2} + \frac{\min(d_1, d_2)}{2} \right)
+\end{equation}
+Thành phần thứ nhất đảm bảo rằng tổng số bước không thể nhỏ hơn số bước khối ở xa nhất tự lăn tới đích. Thành phần thứ hai mô phỏng việc hai khối bắt buộc phải di chuyển lại gần nhau để hợp nhất, sau đó cùng đi đến đích.
+
+\textbf{3. Chứng minh Tính chấp nhận được}
+
+Một hàm heuristic được gọi là chấp nhận được nếu $h(n) \le h^*(n)$ với mọi $n$, trong đó $h^*(n)$ là chi phí thực tế nhỏ nhất từ $n$ đến đích. Với mỗi nước đi hợp lệ, hàm chi phí được chọn là $c = 1$.
+
+\textbf{3.1. Đối với khối liền:}\\
+Không gian $\mathcal{G}_{relax}$ được tạo ra bằng cách gỡ bỏ bớt các ràng buộc rào cản (cầu đóng) so với trò chơi thực tế. Theo lý thuyết đồ thị, mọi đường đi hợp lệ trong trò chơi thực tế đều tồn tại và hợp lệ trên đồ thị $\mathcal{G}_{relax}$. Vì BFS luôn tìm đường đi ngắn nhất trên đồ thị không trọng số, độ dài đường đi trên $\mathcal{G}_{relax}$ không bao giờ vượt quá độ dài đường đi trên đồ thị thực tế. Do đó: $h_{3D}(n) \le h^*(n)$.
+
+\textbf{3.2. Đối với khối tách:}\\
+Một thao tác điều khiển trong game tốn chi phí 1. Một khối gạch khi lăn 1 vòng có thể làm thay đổi tọa độ Manhattan của một phần tử khối đi tối đa 2 đơn vị (ví dụ từ Nằm chuyển sang Đứng). 
+\begin{itemize}
+    \item Khối ở xa đích nhất tốn ít nhất $\lceil \max(d_1, d_2) / 2 \rceil$ bước lăn.
+    \item Để gộp lại, khoảng cách $d_{cubes}$ phải thu hẹp về 1 (nằm kề nhau). Số bước tối thiểu cho việc này là $(d_{cubes} - 1) / 2$. Sau khi gộp, chúng phải di chuyển ít nhất $\min(d_1, d_2) / 2$ bước để tới đích.
+\end{itemize}
+Vì $h_{split}(n)$ lấy $\max$ của hai đại lượng đều là chặn dưới (lower-bound) của giới hạn hình học, nên $h_{split}(n) \le h^*(n)$ luôn đúng.
+
+\textbf{4. Chứng minh Tính nhất quán (Consistency)}
+
+Hàm heuristic là nhất quán (đơn điệu) nếu với mọi đỉnh $n$ và đỉnh kề $n'$ được tạo ra bởi hành động $a$ có chi phí $c(n, a, n') = 1$, ta có:
+\begin{equation}
+    h(n) \le c(n, a, n') + h(n') \implies h(n) \le 1 + h(n')
+\end{equation}
+
+\textbf{4.1. Đối với khối liền:}\\
+Bản đồ khoảng cách được xây dựng bằng cách lan truyền BFS ngược. Theo định nghĩa cấu trúc của BFS, khoảng cách của một đỉnh $n$ bằng khoảng cách của đỉnh kề nó $n'$ cộng thêm đúng chi phí cạnh (là 1) trên đồ thị nới lỏng. Nếu hành động $a$ bị chặn bởi luật cầu ở thế giới thực (không tồn tại trong BFS), đỉnh kề thực tế sẽ đi đường vòng khiến $h(n') \ge h(n) - 1$. Bất đẳng thức tam giác luôn được bảo toàn, do vậy hàm $h_{3D}$ thỏa mãn tính nhất quán tuyệt đối.
+
+\textbf{4.2. Đối với khối tách:}\\
+Hàm số Manhattan trên mặt phẳng 2D mặc định thỏa mãn bất đẳng thức tam giác:
+\begin{equation}
+    d_M(X, Z) \le d_M(X, Y) + d_M(Y, Z)
+\end{equation}
+Bằng phép chia hằng số dương (chia 2) và tính chất tuyển $\max$, tính đơn điệu không bị phá vỡ qua các bước chuyển đổi trạng thái.
+
+\textbf{Kết luận:} Hàm $h(n)$ được đề xuất vừa Admissible vừa Consistent, đảm bảo thuật toán A* sẽ luôn trả về số nước đi ngắn nhất mà không mở rộng dư thừa (re-expand) các trạng thái đã xét.
 
 \section{Thực nghiệm và Đánh giá}
 
