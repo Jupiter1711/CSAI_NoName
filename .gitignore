@@ -8,3 +8,5 @@ data/
 .coverage
 htmlcov/
 CLAUDE.md
+uv.lock
+report/
