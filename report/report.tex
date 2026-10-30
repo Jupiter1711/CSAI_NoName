@@ -177,7 +177,7 @@ Mã nguồn thực hiện truy vết đường đi thông qua bảng băm \textt
 \textbf{3. Phân tích Tính Đầy đủ và Tính Tối ưu}
 
 \textbf{a. Tính đầy đủ}
-Thuật toán BFS đảm bảo \texttt{tính đầy đủ}: Nếu bài toán tồn tại lời giải, BFS chắc chắn sẽ tìm ra. 
+Thuật toán BFS đảm bảo \texttt{tính đầy đủ}: Nếu bài toán tồn tại lời giải, BFS chắc chắn sẽ tìm ra.
 \begin{itemize}
     \item Bài toán Bloxorz có không gian trạng thái hữu hạn (các ô bàn chơi, các tư thế khối gạch và tập hợp trạng thái cầu/công tắc).
     \item Việc kiểm tra \texttt{next\_state not in came\_from} trước khi đưa vào hàng đợi giúp ngăn chặn việc duyệt lặp lại các chu trình (cycles), tránh vòng lặp vô tận.
@@ -246,12 +246,12 @@ Trước khi A* thực thi, ta xây dựng một không gian trạng thái nới
     \item Tôn trọng tuyệt đối địa hình cứng: Không cho phép lăn ra ngoài vực (\texttt{VOID}) và cấm tư thế đứng thẳng (\texttt{S}) trên ô gạch giòn (\texttt{FRAGILE}).
 \end{itemize}
 
-Từ trạng thái đích $G = (r_G, c_G, \text{S})$, thuật toán BFS chạy ngược để tính khoảng cách ngắn nhất đến mọi tọa độ và tư thế hợp lệ trên bản đồ. Kết quả được lưu vào bảng băm $D$. 
+Từ trạng thái đích $G = (r_G, c_G, \text{S})$, thuật toán BFS chạy ngược để tính khoảng cách ngắn nhất đến mọi tọa độ và tư thế hợp lệ trên bản đồ. Kết quả được lưu vào bảng băm $D$.
 
 Hàm heuristic cho trạng thái khối liền $n = (r, c, k)$ được định nghĩa là:
 \begin{equation}
-    h(n) = 
-    \begin{cases} 
+    h(n) =
+    \begin{cases}
     D[r, c, k] & \text{nếu } (r, c, k) \in D \\
     \frac{|r - r_G| + |c - c_G|}{2} & \text{trong trường hợp ngoại lệ (dự phòng)}
     \end{cases}
@@ -260,7 +260,7 @@ Nhờ việc tính toán trước (pre-compute), $h(n)$ có độ phức tạp t
 
 \textbf{2. Trường hợp khối tách đôi}
 
-Khi đi qua công tắc Split, khối gạch tách thành hai khối lập phương nhỏ $C_1 = (r_1, c_1)$ và $C_2 = (r_2, c_2)$. Để chiến thắng, hai khối này phải hợp lại thành một khối liền kề và di chuyển đến đích. 
+Khi đi qua công tắc Split, khối gạch tách thành hai khối lập phương nhỏ $C_1 = (r_1, c_1)$ và $C_2 = (r_2, c_2)$. Để chiến thắng, hai khối này phải hợp lại thành một khối liền kề và di chuyển đến đích.
 
 Gọi $d_M(A, B)$ là khoảng cách Manhattan phẳng giữa hai điểm $A$ và $B$. Ta định nghĩa:
 \begin{itemize}
@@ -282,7 +282,7 @@ Một hàm heuristic được gọi là chấp nhận được nếu $h(n) \le h
 Không gian $\mathcal{G}_{relax}$ được tạo ra bằng cách gỡ bỏ bớt các ràng buộc rào cản (cầu đóng) so với trò chơi thực tế. Theo lý thuyết đồ thị, mọi đường đi hợp lệ trong trò chơi thực tế đều tồn tại và hợp lệ trên đồ thị $\mathcal{G}_{relax}$. Vì BFS luôn tìm đường đi ngắn nhất trên đồ thị không trọng số, độ dài đường đi trên $\mathcal{G}_{relax}$ không bao giờ vượt quá độ dài đường đi trên đồ thị thực tế. Do đó: $h_{3D}(n) \le h^*(n)$.
 
 \textbf{3.2. Đối với khối tách:}\\
-Một thao tác điều khiển trong game tốn chi phí 1. Một khối gạch khi lăn 1 vòng có thể làm thay đổi tọa độ Manhattan của một phần tử khối đi tối đa 2 đơn vị (ví dụ từ Nằm chuyển sang Đứng). 
+Một thao tác điều khiển trong game tốn chi phí 1. Một khối gạch khi lăn 1 vòng có thể làm thay đổi tọa độ Manhattan của một phần tử khối đi tối đa 2 đơn vị (ví dụ từ Nằm chuyển sang Đứng).
 \begin{itemize}
     \item Khối ở xa đích nhất tốn ít nhất $\lceil \max(d_1, d_2) / 2 \rceil$ bước lăn.
     \item Để gộp lại, khoảng cách $d_{cubes}$ phải thu hẹp về 1 (nằm kề nhau). Số bước tối thiểu cho việc này là $(d_{cubes} - 1) / 2$. Sau khi gộp, chúng phải di chuyển ít nhất $\min(d_1, d_2) / 2$ bước để tới đích.
